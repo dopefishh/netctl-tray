@@ -1,7 +1,5 @@
 Netctltray version 0.1
 ======================
-
-### Intro
 Netctltray is an application that provides a system tray icon for the netctl
 network manager. Via the system icon you can change profile and get query the
 status of the current connection.
