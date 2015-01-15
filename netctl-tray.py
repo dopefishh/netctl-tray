@@ -1,27 +1,6 @@
 from PySide import QtGui
 import sys
-import subprocess
-
-
-def get_profiles():
-    profiles = subprocess.check_output(['netctl', 'list'])
-    actives = []
-    passives = []
-    for profile in profiles.splitlines():
-        profile = profile.decode(sys.getdefaultencoding())
-        if profile.startswith('*'):
-            actives.append(profile[2:].strip())
-        elif profile:
-            passives.append(profile.strip())
-    return actives, passives
-
-
-def start_profile(profile):
-    pass
-
-
-def end_profile(profile):
-    pass
+import netctl
 
 
 class NetctlTray(QtGui.QSystemTrayIcon):
@@ -44,15 +23,18 @@ class NetctlTray(QtGui.QSystemTrayIcon):
 
     def updateMenu(self):
         self.connect_menu.clear()
-        actives, passives = get_profiles()
-        for active in actives:
-            active = self.connect_menu.addAction(active)
-            active.setCheckable(True)
-            active.setChecked(True)
-        for passive in passives:
-            passive = self.connect_menu.addAction(passive)
-            passive.setCheckable(True)
-            passive.setChecked(False)
+        self.int_profs = {}
+        profiles = sorted(netctl.get_profiles(), key=lambda x: x['interface'])
+        for profile in profiles:
+            if profile['interface'] not in self.int_profs:
+                self.connect_menu.addSeparator()
+                self.int_profs[profile['interface']] = []
+            self.int_profs[profile['interface']].append(profile['name'])
+            item = self.connect_menu.addAction(profile['name'])
+            item.setCheckable(True)
+            if profile['active']:
+                item.setChecked(True)
+            item.triggered.connect
 
     def sig_activated(self, reason):
         if reason == QtGui.QSystemTrayIcon.Unknown:
