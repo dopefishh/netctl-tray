@@ -4,8 +4,10 @@ import sys
 
 netctl_root = '/etc/netctl'
 
+current_profiles = []
 
-def get_profiles():
+
+def update_profiles():
     """Give the current profiles registered with netctl.
 
     Yields:
@@ -15,7 +17,7 @@ def get_profiles():
         interface - String containing the interface name.
         name      - String containing the name of the profile.
     """
-
+    current_profiles.clear()
     profiles = subprocess.check_output(['netctl', 'list'])
     for profile in profiles.splitlines():
         profile = profile.decode(sys.getdefaultencoding())
@@ -24,11 +26,21 @@ def get_profiles():
         with open(cp['file'], 'r') as f:
             for line in f:
                 if line.startswith('Interface='):
-                    cp['interface'] = line[10:]
+                    cp['interface'] = line[10:].strip()
+                    ifile =\
+                        '{}/interfaces/{}'.format(netctl_root, cp['interface'])
+                    try:
+                        with open(ifile, 'r') as virt:
+                            virt.read()
+                        cp['interface'] = subprocess.check_output(
+                            [ifile]).decode(sys.getdefaultencoding())
+                    except FileNotFoundError:
+                        pass
+                    print('translated to : {}'.format(cp['interface']))
                     break
             else:
-                cp['interface'] = 'undetected'
-        yield cp
+                cp['interface'] = None
+        current_profiles.append(cp)
 
 
 def start_profile(profile, notify=None):
@@ -41,6 +53,7 @@ def start_profile(profile, notify=None):
         notify.showMessage(
             '', 'Starting {}...'.format(profile),
             QtGui.QSystemTrayIcon.NoIcon, msecs=5000)
+    subprocess.call(['netctl', 'start', profile])
 
 
 def stop_profile(profile, notify=None):
@@ -53,3 +66,22 @@ def stop_profile(profile, notify=None):
         notify.showMessage(
             '', 'Stopping {}...'.format(profile),
             QtGui.QSystemTrayIcon.NoIcon, msecs=5000)
+
+
+def get_profiles():
+    update_profiles()
+    return current_profiles
+
+
+def get_statussus():
+    """Give the statusses of the active connections.
+
+    Yields:
+        String for every active status.
+    """
+    for profile in get_profiles():
+        if profile['active']:
+            if profile['interface']:
+                ip = subprocess.check_output(
+                    ['ip', 'addr', 'show', profile['interface']])
+            yield '{}: {}'.format(profile['name'], ip)

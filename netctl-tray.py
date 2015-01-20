@@ -35,6 +35,7 @@ class NetworkAction(QtGui.QAction):
             for concurent in concurents:
                 netctl.stop_profile(concurent['name'], self.tray)
             netctl.start_profile(self.profile['name'], self.tray)
+        self.tray.show_status()
 
 
 class NetctlTray(QtGui.QSystemTrayIcon):
@@ -74,6 +75,13 @@ class NetctlTray(QtGui.QSystemTrayIcon):
             self.connect_menu.addAction(
                 NetworkAction(self.connect_menu, self, profile, profiles))
 
+    def show_status(self):
+        print('stati')
+        self.showMessage(
+            'Current connection',
+            '\n'.join(netctl.get_statussus()),
+            QtGui.QSystemTrayIcon.NoIcon, msecs=5000)
+
     def sig_activated(self, reason):
         """Signal handler for clicking the tray icon.
 
@@ -86,11 +94,8 @@ class NetctlTray(QtGui.QSystemTrayIcon):
         if reason == QtGui.QSystemTrayIcon.Context:
             self.updateMenu()
             self.contextMenu().popup(self.geometry().topLeft())
-        elif reason == QtGui.QSystemTrayIcon.Click:
-            self.showMessage(
-                'Current connection',
-                'connected to: blablabla',
-                QtGui.QSystemTrayIcon.NoIcon, msecs=5000)
+        elif reason == QtGui.QSystemTrayIcon.Trigger:
+            self.show_status()
 
     def sig_messageClicked(self):
         """Signal handler for clicking the status popup. When this happens a

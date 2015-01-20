@@ -9,6 +9,4 @@ status of the current connection.
 - PySide
 
 ### Author(s)
--	Mart
-	
-	mart@martlubbers.net
+-	Mart (mart@martlubbers.net)
