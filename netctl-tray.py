@@ -1,6 +1,9 @@
 from PySide import QtGui
+import shlex
 import sys
 import netctl
+import logging
+import argparse
 
 
 class NetworkAction(QtGui.QAction):
@@ -25,16 +28,22 @@ class NetworkAction(QtGui.QAction):
         """Signal handler for activating the action. In practice this is
         starting or stopping the profile. When there is another profile active
         with the same interface it will be stopped."""
+        logging.debug('Clicked on an interface')
         if self.profile['active']:
-            netctl.stop_profile(self.profile['name'], self.tray)
+            logging.debug('Interface was active, stopping...')
+            netctl.startstop_profile(self.profile['name'], False)
         else:
+            logging.debug('Interface was passive, finding concurrents')
             concurents = [a for a in self.profiles if
                           a is not self.profile and
                           a['interface'] == self.profile['interface'] and
                           a['active']]
+            logging.debug('Concurrents found: {}'.format(concurents))
             for concurent in concurents:
-                netctl.stop_profile(concurent['name'], self.tray)
-            netctl.start_profile(self.profile['name'], self.tray)
+                logging.debug('Stopping concurent: {}'.format(concurent))
+                netctl.startstop_profile(concurent['name'], False)
+            logging.debug('Starting interface')
+            netctl.startstop_profile(self.profile['name'], True)
         self.tray.show_status()
 
 
@@ -76,11 +85,11 @@ class NetctlTray(QtGui.QSystemTrayIcon):
                 NetworkAction(self.connect_menu, self, profile, profiles))
 
     def show_status(self):
-        print('stati')
-        self.showMessage(
-            'Current connection',
-            '\n'.join(netctl.get_statussus()),
-            QtGui.QSystemTrayIcon.NoIcon, msecs=5000)
+        """Show the status of the connections"""
+        status = list(netctl.get_statussus())
+        status = '\n'.join(status) if status else 'No profiles active'
+        self.showMessage('Current connection(s)', status,
+                         QtGui.QSystemTrayIcon.NoIcon, msecs=5000)
 
     def sig_activated(self, reason):
         """Signal handler for clicking the tray icon.
@@ -116,10 +125,39 @@ class NetctlTray(QtGui.QSystemTrayIcon):
             'This is an about window',
             QtGui.QMessageBox.Close)
 
-if __name__ == '__main__':
+
+def main():
+    """Main function"""
+    logger = logging.getLogger()
+    parser = argparse.ArgumentParser(description='Netctl profile switcher')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='Enable debug')
+    parser.add_argument('-6', '--ipv6', action='store_true',
+                        help='Prefer ipv6 over ipv4')
+    parser.add_argument('-S', '--sudo', action='store',
+                        help='Sudo command used for getting the password. (def'
+                        'ault: sudo -A')
+    parser.add_argument('-N', '--netctl', action='store',
+                        help='Netctl command used for starting and stopping th'
+                        'e profiles. (default: netctl)')
+    namespace = vars(parser.parse_args())
+
+    if namespace['debug']:
+        logger.setLevel(10)
+    if namespace['ipv6']:
+        netctl.prefer_ipv6 = True
+    if namespace['sudo']:
+        netctl.sudo_command = shlex.split(namespace['sudo'])
+    if namespace['netctl']:
+        netctl.netctl_command = namespace(namespace['netctl'])
+
     app = QtGui.QApplication(sys.argv)
 
     icon = NetctlTray()
     icon.setVisible(True)
     icon.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
