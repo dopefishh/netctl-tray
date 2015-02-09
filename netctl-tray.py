@@ -2,7 +2,6 @@ from PySide import QtGui
 import shlex
 import sys
 import netctl
-import logging
 import argparse
 
 
@@ -28,21 +27,15 @@ class NetworkAction(QtGui.QAction):
         """Signal handler for activating the action. In practice this is
         starting or stopping the profile. When there is another profile active
         with the same interface it will be stopped."""
-        logging.debug('Clicked on an interface')
         if self.profile['active']:
-            logging.debug('Interface was active, stopping...')
             netctl.startstop_profile(self.profile['name'], False)
         else:
-            logging.debug('Interface was passive, finding concurrents')
             concurents = [a for a in self.profiles if
                           a is not self.profile and
                           a['interface'] == self.profile['interface'] and
                           a['active']]
-            logging.debug('Concurrents found: {}'.format(concurents))
             for concurent in concurents:
-                logging.debug('Stopping concurent: {}'.format(concurent))
                 netctl.startstop_profile(concurent['name'], False)
-            logging.debug('Starting interface')
             netctl.startstop_profile(self.profile['name'], True)
         self.tray.show_status()
 
@@ -128,7 +121,6 @@ class NetctlTray(QtGui.QSystemTrayIcon):
 
 def main():
     """Main function"""
-    logger = logging.getLogger()
     parser = argparse.ArgumentParser(description='Netctl profile switcher')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='Enable debug')
