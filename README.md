@@ -7,6 +7,7 @@ status of the current connection.
 #### Requirements
 Requirements with a \* are optional
 
+- Window manager with *freedesktop.org* system tray specification implemented.
 - Python3 : Main programming language.
 - PySide : Python interface to Qt.
 - netctl : Network management.
@@ -36,6 +37,9 @@ similar file.
 but it does this in a naive way. It runs the script and imports the
 ``$Interface`` variable. When an interface already has an active profile the
 active profile will be stopped prior to the start of the new profile.
+
+You can change the icons if you want for a better integration with your WM.
+Just change the svg files.
 
 ### Author(s)
 -	Mart (mart@martlubbers.net).
