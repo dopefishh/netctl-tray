@@ -32,11 +32,13 @@ with ``ssh-askpass`` you can add
 ``export SUDO_ASKPASS=/usr/lib/ssh/ssh-askpass`` to your ``~/.bashrc`` or
 similar file. 
 
+When an interface already has an active profile the
+active profile will be stopped prior to the start of the new profile.
+
 ``netctl.py`` can also work with 
 [flexible interfaces](https://wiki.archlinux.org/index.php/Netctl#Using_any_interface)
 but it does this in a naive way. It runs the script and imports the
-``$Interface`` variable. When an interface already has an active profile the
-active profile will be stopped prior to the start of the new profile.
+``$Interface`` variable and uses that as interface.
 
 You can change the icons if you want for a better integration with your WM.
 Just change the svg files.
