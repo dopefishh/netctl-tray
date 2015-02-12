@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 from PySide import QtGui
 import shlex
 import sys
 import netctl
 import argparse
+import os
 
 
 class NetworkAction(QtGui.QAction):
@@ -13,14 +15,14 @@ class NetworkAction(QtGui.QAction):
     profile   - Representing profile.
     profiles  - List of all profiles.
     """
-    def __init__(self, parent, tray, profile, profiles):
-        super(NetworkAction, self).__init__(parent)
+    def __init__(self, tray, profile, profiles):
+        super(NetworkAction, self).__init__(tray.contextMenu())
         self.tray = tray
         self.profile = profile
         self.profiles = profiles
         self.setText(profile['name'])
-        self.setCheckable(True)
-        self.setChecked(profile['active'])
+        if profile['active']:
+            self.setIcon(tray.activenetwork)
         self.triggered.connect(self.sig_triggered)
 
     def sig_triggered(self):
@@ -49,33 +51,28 @@ class NetctlTray(QtGui.QSystemTrayIcon):
     """
     def __init__(self):
         super(NetctlTray, self).__init__()
-        self.setIcon(QtGui.QIcon('icon.svg'))
+        path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        self.activenetwork = QtGui.QIcon('{}/check.svg'.format(path))
+        self.setIcon(QtGui.QIcon('{}/icon.svg'.format(path)))
         self.activated.connect(self.sig_activated)
         self.messageClicked.connect(self.sig_messageClicked)
-        menu = QtGui.QMenu('Netctl-tray')
-
-        self.connect_menu = menu.addMenu('Connect')
-
-        about = menu.addAction('About')
-        about.triggered.connect(self.sig_about)
-
-        quit = menu.addAction('Exit')
-        quit.triggered.connect(self.sig_exit)
-
-        self.setContextMenu(menu)
+        self.setContextMenu(QtGui.QMenu('Netctl-tray'))
+        self.updateMenu()
 
     def updateMenu(self):
         """Update the menu according to netctl output and profile files."""
-        self.connect_menu.clear()
-        self.int_profs = {}
-        profiles = sorted(netctl.get_profiles(), key=lambda x: x['interface'])
-        for profile in profiles:
-            if profile['interface'] not in self.int_profs:
-                self.connect_menu.addSeparator()
-                self.int_profs[profile['interface']] = []
-            self.int_profs[profile['interface']].append(profile['name'])
-            self.connect_menu.addAction(
-                NetworkAction(self.connect_menu, self, profile, profiles))
+        self.contextMenu().clear()
+        self.contextMenu().addSeparator()
+        previous_interface = ''
+        profs = sorted(netctl.get_profiles(), key=lambda x: x['interface'])
+        last = None
+        for p in profs:
+            if p['interface'] != previous_interface:
+                last = QtGui.QMenu(p['interface'])
+                self.contextMenu().addMenu(last)
+                previous_interface = p['interface']
+            last.addAction(NetworkAction(self, p, profs))
+        self.contextMenu().addAction('Exit').triggered.connect(self.sig_exit)
 
     def show_status(self):
         """Show the status of the connections"""
@@ -109,21 +106,10 @@ class NetctlTray(QtGui.QSystemTrayIcon):
         happens the program quits."""
         sys.exit()
 
-    def sig_about(self):
-        """Signal handler for the about button in the main menu. When this
-        happens the program shows a dialog box containing the about info."""
-        QtGui.QMessageBox.information(
-            None,
-            'About',
-            'This is an about window',
-            QtGui.QMessageBox.Close)
-
 
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='Netctl profile switcher')
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='Enable debug')
     parser.add_argument('-6', '--ipv6', action='store_true',
                         help='Prefer ipv6 over ipv4')
     parser.add_argument('-S', '--sudo', action='store',
@@ -134,8 +120,6 @@ def main():
                         'e profiles. (default: netctl)')
     namespace = vars(parser.parse_args())
 
-    if namespace['debug']:
-        logger.setLevel(10)
     if namespace['ipv6']:
         netctl.prefer_ipv6 = True
     if namespace['sudo']:
