@@ -16,13 +16,14 @@ Requirements with a \* are optional
 	``$SUDO_ASKPASS``
 - x11-ssh-askpass\* : Default option for querying the sudo password.
 
-sudo and x11-ssh-askpass are needed when the user can not run the netctl
-commands and 
-
-#### Installation
+These requirements can be easily met by running:
 
 	# pacman -S python python-pyside
 	# pacman -S sudo x11-ssh-askpass
+
+#### Installation
+
+
 
 ### Options
 #### Command line options

@@ -1,10 +1,13 @@
 #!/usr/bin/env python
+
 from PySide import QtGui
 import shlex
 import sys
 import netctl
 import argparse
 import os
+
+VERSION = '0.2'
 
 
 class NetworkAction(QtGui.QAction):
@@ -110,6 +113,8 @@ class NetctlTray(QtGui.QSystemTrayIcon):
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='Netctl profile switcher')
+    parser.add_argument('--version', action='store_true',
+                        help='Show the version')
     parser.add_argument('-6', '--ipv6', action='store_true',
                         help='Prefer ipv6 over ipv4 when showing the status.')
     parser.add_argument('-S', '--sudo', action='store',
@@ -125,7 +130,9 @@ def main():
                         help='Root of the netctl configuration directory. By d'
                         'efault this is "/etc/netctl".')
     namespace = vars(parser.parse_args())
-
+    if namespace['version']:
+        sys.stdout.write(VERSION + '\n')
+        sys.exit()
     if namespace['ipv6']:
         netctl.prefer_ipv6 = True
     if namespace['sudo']:
