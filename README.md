@@ -53,6 +53,7 @@ Just change the svg files.
 	- Remove logging.
 	- Added checkmark icon for active networks.
 	- Added password question for network changes.
+	- Added more information to readme.
 
 - Version 0.1 (2015-01-05)
 
