@@ -111,13 +111,19 @@ def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='Netctl profile switcher')
     parser.add_argument('-6', '--ipv6', action='store_true',
-                        help='Prefer ipv6 over ipv4')
+                        help='Prefer ipv6 over ipv4 when showing the status.')
     parser.add_argument('-S', '--sudo', action='store',
-                        help='Sudo command used for getting the password. (def'
-                        'ault: sudo -A')
+                        help='Use the command SUDO for getting root permission'
+                        's. By default this is command is "sudo -A" and it ass'
+                        'umes that you have set the SUDO_ASKPASS environment v'
+                        'ariable. It is tested with "ssh-askpass" as askpass p'
+                        'rogram.')
     parser.add_argument('-N', '--netctl', action='store',
-                        help='Netctl command used for starting and stopping th'
-                        'e profiles. (default: netctl)')
+                        help='Location of the netctl binary. By default this i'
+                        's just "netctl" and thus assumes it to be in $PATH.')
+    parser.add_argument('-R', '--nroot', action='store',
+                        help='Root of the netctl configuration directory. By d'
+                        'efault this is "/etc/netctl".')
     namespace = vars(parser.parse_args())
 
     if namespace['ipv6']:
@@ -125,7 +131,9 @@ def main():
     if namespace['sudo']:
         netctl.sudo_command = shlex.split(namespace['sudo'])
     if namespace['netctl']:
-        netctl.netctl_command = namespace(namespace['netctl'])
+        netctl.netctl_command = namespace['netctl']
+    if namespace['nroot']:
+        netctl.netctl_root = namespace['nroot']
 
     app = QtGui.QApplication(sys.argv)
 

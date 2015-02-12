@@ -24,24 +24,44 @@ commands and
 	# pacman -S python python-pyside
 	# pacman -S sudo x11-ssh-askpass
 
-### Usage and setup
-By default the command that runs netctl is prefixed with ``sudo -A``. This is
-stored in the variable ``sudo_command``. This is done to not have to setup a
-daemon to access netctl with root permission. To use ``sudo`` in combination
-with ``ssh-askpass`` you can add 
-``export SUDO_ASKPASS=/usr/lib/ssh/ssh-askpass`` to your ``~/.bashrc`` or
-similar file. 
+### Options
+#### Command line options
+- ``-h``, ``--help``
 
-When an interface already has an active profile the
-active profile will be stopped prior to the start of the new profile.
+	Show the help message.
 
-``netctl.py`` can also work with 
-[flexible interfaces](https://wiki.archlinux.org/index.php/Netctl#Using_any_interface)
-but it does this in a naive way. It runs the script and imports the
-``$Interface`` variable and uses that as interface.
+- ``-6``, ``--ipv6``
 
-You can change the icons if you want for a better integration with your WM.
-Just change the svg files.
+	Prefer ipv6 over ipv4 when showing the status.
+
+- ``-S``, ``--sudo COMMAND``
+
+	Use the command COMMAND for getting root permissions. By default this
+	is command is ``sudo -A`` and it assumes that you have set the
+	``SUDO_ASKPASS`` environment variable. It is tested with
+	``ssh-askpass`` as askpass program.
+
+- ``-N``, ``--netctl PATH``
+
+	Location of the netctl binary. By default this is just ``netctl`` and
+	thus assumes it to be in ``$PATH``.
+
+- ``-R``, ``--nroot PATH``
+
+	Root of the netctl configuration directory. By default this
+	``/etc/netctl``.
+
+#### Some notes
+- When an interface already has an active profile the active profile will be
+  	stopped prior to the start of the new profile.
+
+- ``netctl.py`` can also work with [flexible interfaces](
+	https://wiki.archlinux.org/index.php/Netctl#Using_any_interface) but it
+	does this in a naive way. It runs the script and imports the
+	``$Interface`` variable and uses that as interface.
+
+- You can change the icons if you want for a better integration with your WM.
+	Just change the svg files.
 
 ### Author(s)
 -	Mart (mart@martlubbers.net).
