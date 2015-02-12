@@ -54,9 +54,7 @@ class NetctlTray(QtGui.QSystemTrayIcon):
     """
     def __init__(self):
         super(NetctlTray, self).__init__()
-        path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        if path == '/usr/bin':
-            path = '/opt/netctltray'
+        path = '/opt/netctltray/'
         self.activenetwork = QtGui.QIcon('{}/check.svg'.format(path))
         self.setIcon(QtGui.QIcon('{}/icon.svg'.format(path)))
         self.activated.connect(self.sig_activated)
