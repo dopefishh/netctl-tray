@@ -6,7 +6,7 @@ import sys
 import netctl
 import argparse
 
-VERSION = '0.2'
+VERSION = '0.2a'
 RESOURCES = '/opt/netctltray'  # Set to directory with svg's
 
 

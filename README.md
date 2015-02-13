@@ -1,4 +1,4 @@
-# Netctltray version 0.2
+# Netctltray version 0.3
 Netctltray is an application that provides a system tray icon for the netctl
 network manager. Via the system icon you can change profile and get query the
 status of the current connection.
@@ -68,6 +68,11 @@ These requirements can be easily met by running:
 -	Mart (mart@martlubbers.net).
 
 ### Changelog
+- Version 0.2a (2015-02-13)
+	- Fixed inet bug
+	- Fixed bug with resources, it now searches in the path defined by the
+	  RESOURCE variable in netctltray.py
+
 - Version 0.2 (2015-02-12)
 
 	- Rewritten menu.
