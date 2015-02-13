@@ -1,7 +1,6 @@
 import subprocess
 import sys
 
-
 netctl_command = 'netctl'      # Netctl command
 netctl_root = '/etc/netctl'    # Root of the netctl configuration files
 prefer_ipv6 = False            # Flag to print ipv6 address over ipv4
@@ -69,5 +68,7 @@ def get_statussus():
         for ent in (x for x in ip if x.startswith('inet')):
             splits = ent.split()[:2]
             ips[splits[0]] = splits[1]
-        ip = ips['inet6'] if prefer_ipv6 and 'inet6' in ips else ips['inet']
+        ip = ips.get('inet', 'couldn\'t determine ip address')
+        if prefer_ipv6:
+            ip = ips.get('inet', '') or ip
         yield '{}: {}'.format(prof['name'], ip)

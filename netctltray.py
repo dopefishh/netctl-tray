@@ -5,9 +5,9 @@ import shlex
 import sys
 import netctl
 import argparse
-import os
 
 VERSION = '0.2'
+RESOURCES = '/opt/netctltray'  # Set to directory with svg's
 
 
 class NetworkAction(QtGui.QAction):
@@ -54,14 +54,11 @@ class NetctlTray(QtGui.QSystemTrayIcon):
     """
     def __init__(self):
         super(NetctlTray, self).__init__()
-        path = os.path.dirname(os.path.abspath(sys.argv[0]))
-        if path == '/usr/bin':
-            path = '/opt/netctltray'
-        self.activenetwork = QtGui.QIcon('{}/check.svg'.format(path))
-        self.setIcon(QtGui.QIcon('{}/icon.svg'.format(path)))
+        self.activenetwork = QtGui.QIcon('{}/check.svg'.format(RESOURCES))
+        self.setIcon(QtGui.QIcon('{}/icon.svg'.format(RESOURCES)))
         self.activated.connect(self.sig_activated)
         self.messageClicked.connect(self.sig_messageClicked)
-        self.setContextMenu(QtGui.QMenu('Netctl-tray'))
+        self.setContextMenu(QtGui.QMenu('Netctltray'))
         self.updateMenu()
 
     def updateMenu(self):
